@@ -9,6 +9,8 @@ import signal
 import time
 import json
 
+import logging
+log = logging.getLogger('liveprofiler_sampler')
 
 class Sampler(object):
     STACK_SEPARATOR = ";"
@@ -23,6 +25,7 @@ class Sampler(object):
         self._stack_counts = collections.defaultdict(int)
 
     def start(self):
+        log.debug('Starting liveprofiler_sampler. Interval: {}'.format(self.interval))
         self._started = time.time()
         try:
             signal.signal(signal.SIGVTALRM, self._sample)
@@ -34,6 +37,7 @@ class Sampler(object):
 
     def _sample(self, signum, frame):
         stack = []
+        log.debug('Sampling is going to happen: signum: {}, frame: {}'.format(signum, frame))
         while frame is not None:
             stack.append(self._format_frame(frame))
             frame = frame.f_back
@@ -80,6 +84,7 @@ class ProfilingMiddleware(object):
         self.sampler.start()
 
     def __call__(self, environ, start_response):
+        log.debug('Calling liveprofiler_sampler middleware')
         if environ.get('REQUEST_METHOD') != 'GET' or environ.get('PATH_INFO') != ProfilingMiddleware.PROFILING_PATH:
             return self.app(environ, start_response)
 
