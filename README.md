@@ -73,3 +73,13 @@ To install the package simply type:
 ```
 pip install liveprofiler_sampler
 ```
+
+# uWSGI integration
+
+Because sampler is implemented based on signals, you have to be aware of that when running your service under uWSGI.
+In order to gather any samples you need to add following configuration to your uwsgi.ini
+```
+py-call-osafterfork = true  # enable child processes running cpython to trap OS signals
+lazy-apps = true  # load apps in each worker instead of the master
+
+```
